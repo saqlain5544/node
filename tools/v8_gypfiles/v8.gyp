@@ -1439,6 +1439,8 @@
         '<(V8_ROOT)/src/libplatform/default-job.h',
         '<(V8_ROOT)/src/libplatform/default-platform.cc',
         '<(V8_ROOT)/src/libplatform/default-platform.h',
+        '<(V8_ROOT)/src/libplatform/default-thread-isolated-allocator.cc',
+        '<(V8_ROOT)/src/libplatform/default-thread-isolated-allocator.h',
         '<(V8_ROOT)/src/libplatform/default-worker-threads-task-runner.cc',
         '<(V8_ROOT)/src/libplatform/default-worker-threads-task-runner.h',
         '<(V8_ROOT)/src/libplatform/delayed-task-queue.cc',
