@@ -50,7 +50,7 @@ using DisasmX64Test = TestWithIsolate;
 namespace {
 
 Handle<Code> CreateDummyCode(Isolate* isolate) {
-  i::byte buffer[128];
+  uint8_t buffer[128];
   Assembler assm(AssemblerOptions{},
                  ExternalAssemblerBuffer(buffer, sizeof(buffer)));
   __ nop();
@@ -66,7 +66,7 @@ Handle<Code> CreateDummyCode(Isolate* isolate) {
 
 TEST_F(DisasmX64Test, DisasmX64) {
   HandleScope handle_scope(isolate());
-  v8::internal::byte buffer[8192];
+  uint8_t buffer[8192];
   Assembler assm(AssemblerOptions{},
                  ExternalAssemblerBuffer(buffer, sizeof buffer));
   // Some instructions are tested in DisasmX64CheckOutput.
@@ -305,10 +305,10 @@ TEST_F(DisasmX64Test, DisasmX64) {
 #ifdef OBJECT_PRINT
   StdoutStream os;
   code->Print(os);
-  Address begin = code->InstructionStart();
-  Address end = code->InstructionStart();
-  disasm::Disassembler::Disassemble(stdout, reinterpret_cast<byte*>(begin),
-                                    reinterpret_cast<byte*>(end));
+  Address begin = code->instruction_start();
+  Address end = code->instruction_start();
+  disasm::Disassembler::Disassemble(stdout, reinterpret_cast<uint8_t*>(begin),
+                                    reinterpret_cast<uint8_t*>(end));
 #endif
 }
 
@@ -331,7 +331,7 @@ struct DisassemblerTester {
 
   Assembler* assm() { return &assm_; }
 
-  v8::internal::byte buffer_[kAssemblerBufferSize];
+  uint8_t buffer_[kAssemblerBufferSize];
   Assembler assm_;
   disasm::NameConverter converter_;
   disasm::Disassembler disasm;
@@ -749,6 +749,15 @@ TEST_F(DisasmX64Test, DisasmX64CheckOutput) {
           cmovq(less_equal, rax, Operand(rdx, 2)));
   COMPARE("480f4f4203           REX.W cmovgq rax,[rdx+0x3]",
           cmovq(greater, rax, Operand(rdx, 3)));
+  COMPARE("4180f803             cmpb r8l,0x3", cmpb(r8, Immediate(0x3)));
+  COMPARE("6681fa1008           cmpw rdx,0x810", cmpw(rdx, Immediate(0x810)));
+  COMPARE("4180e208             andb r10l,0x8", andb(r10, Immediate(0x8)));
+  COMPARE("4181e1ff3f0000       andl r9,0x3fff", andl(r9, Immediate(0x3fff)));
+  COMPARE("4183e30f             andl r11,0xf", andl(r11, Immediate(0xf)));
+  COMPARE("4883c418             REX.W addq rsp,0x18",
+          addq(rsp, Immediate(0x18)));
+  COMPARE("4881c1cd000000       REX.W addq rcx,0xcd",
+          addq(rcx, Immediate(0xcd)));
 }
 
 // This compares just the disassemble instruction (without the hex).
@@ -1509,6 +1518,10 @@ TEST_F(DisasmX64Test, DisasmX64YMMRegister) {
             vpabsb(ymm3, Operand(rbx, rcx, times_4, 10000)));
     COMPARE("c4e27d1df5           vpabsw ymm6,ymm5", vpabsw(ymm6, ymm5));
     COMPARE("c4c27d1efa           vpabsd ymm7,ymm10", vpabsd(ymm7, ymm10));
+    COMPARE("c4e3fd00ebd8         vpermq ymm5,ymm3,0xd8",
+            vpermq(ymm5, ymm3, 0xD8));
+    COMPARE("c463fd00848b102700001e vpermq ymm8,[rbx+rcx*4+0x2710],0x1e",
+            vpermq(ymm8, Operand(rbx, rcx, times_4, 10000), 0x1E));
   }
 }
 
